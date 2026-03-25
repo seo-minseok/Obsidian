@@ -45,14 +45,15 @@ ChatGPT에 따르면, T_horizon짜리 시퀀스를 모아놓은 경우 (seq, bat
 
 지금 내 코드에서는 (steps_per_epoch, feature) shape으로 모든 데이터가 저장돼 있다.
 
-1. 이를 (episodes, steps, feature)로 reshape
-2. [(episode, chunk_steps, feature), (episode, chunk_steps, feature), ···] 형태로 변환 (episode_len를 chunk_steps로 쪼갠다.)
+1. 이를 (episodes, steps, feature)로 reshape: (E, T, F)
+2. [(num_chuncks, chunk_size, feature), (num_chuncks, chunk_size, feature), ···] 형태로 변환 (episode_len를 chunk_size로 쪼갠다.): (E, C, T, F)
 	- 이때 chunk_steps로 딱 나누어 떨어지지 않을 경우 나머지는 버린다.
-	- episode_len=1000, chunk_steps=128인 경우: 1000 - 128 * 7 = 104개의 데이터는 버림
-3. 마지막으로 transpose 해서 [(chunk_steps, episode, feature), (chunk_steps, episode, feature), ···]로 변경해서 사용
+	- episode_len=1000, chunk_steps=128인 경우: 1000 - 128 * 7(num_chunks) = 104개의 데이터는 버림
+3. 마지막으로 transpose 해서 [(chunk_size, num_chuncks, feature), (chunk_size, num_chuncks, feature), ···]로 변경해서 사용
 
 
 LSTM의 hidden state는 h, c는 위에서 언급한 것처럼 각 시퀀스의 첫번째 데이터에 해당하는 hidden state만 계산하면 되기 때문에 0번 인덱스의 데이터만 가져와서 사용한다.
+*아래 그림 조금 잘못됨 - C는 num_chunks, T는 chunk_size를 의미*
 
 
 ![image](imgs/lstm_data_shapes.png)
